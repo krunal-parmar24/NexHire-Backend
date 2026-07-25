@@ -27,18 +27,18 @@ namespace NexHire.Api.Controllers
         {
             if (req.AcceptedTerms != true)
             {
-                return BadRequest(new { error = "Terms must be accepted" });
+                return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Terms must be accepted" } });
             }
 
             if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
             {
-                return BadRequest(new { error = "Email and password required" });
+                return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Email and password required" } });
             }
 
             var existing = await _db.Users.FirstOrDefaultAsync(u => u.Email == req.Email);
             if (existing != null)
             {
-                return Conflict(new { error = "DUPLICATE_EMAIL" });
+                return Conflict(new { error = new { code = "DUPLICATE_EMAIL", message = "Email is already registered" } });
             }
 
             var user = new User
@@ -61,12 +61,12 @@ namespace NexHire.Api.Controllers
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == req.Email);
             if (user == null)
             {
-                return Unauthorized(new { error = "INVALID_CREDENTIALS" });
+                return Unauthorized(new { error = new { code = "INVALID_CREDENTIALS", message = "Invalid email or password." } });
             }
 
             if (!_hasher.Verify(req.Password, user.PasswordHash))
             {
-                return Unauthorized(new { error = "INVALID_CREDENTIALS" });
+                return Unauthorized(new { error = new { code = "INVALID_CREDENTIALS", message = "Invalid email or password." } });
             }
 
             var access = _jwt.CreateAccessToken(user.Id, user.Role.ToString());
