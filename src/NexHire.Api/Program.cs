@@ -83,7 +83,7 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<NexHireDbContext>();
         var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
         // Run seeder synchronously and surface original exceptions (avoid AggregateException)
-        NexHire.Infrastructure.Persistence.Seed.DevSeeder.SeedAsync(db, hasher).GetAwaiter().GetResult();
+        await NexHire.Infrastructure.Persistence.Seed.DevSeeder.SeedAsync(db, hasher);
     }
 }
 
