@@ -27,17 +27,15 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore, Build and Format (backend)
-        working-directory: backend
         run: |
-          dotnet restore NexHire.sln
-          dotnet build NexHire.sln -c Release --no-restore
-          dotnet format NexHire.sln --verify-no-changes --no-restore || true
+          dotnet restore ./backend/NexHire.sln
+          dotnet build ./backend/NexHire.sln -c Release --no-restore
+          dotnet format ./backend/NexHire.sln --verify-no-changes --no-restore || true
 
       - name: Run unit tests (if any test project exists)
-        working-directory: backend
         run: |
-          if ls **/*.Tests.csproj 1> /dev/null 2>&1; then
-            dotnet test NexHire.sln -c Release --no-build --logger "console;verbosity=normal"
+          if ls backend/**/*.Tests.csproj 1> /dev/null 2>&1; then
+            dotnet test ./backend/NexHire.sln -c Release --no-build --logger "console;verbosity=normal"
           else
             echo "No test projects found yet — step will activate automatically once one is added."
           fi
