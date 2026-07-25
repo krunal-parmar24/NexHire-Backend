@@ -21,7 +21,7 @@ namespace NexHire.Infrastructure.Services
 
         public JwtTokenService(IConfiguration config)
         {
-            _signingKey = config["Jwt:SigningKey"] ?? throw new ArgumentNullException("Jwt:SigningKey");
+            _signingKey = config["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:SigningKey");
             _accessTokenMinutes = int.TryParse(config["Jwt:AccessTokenExpiryMinutes"], out var m) ? m : 15;
         }
 
