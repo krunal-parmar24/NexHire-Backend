@@ -1,0 +1,35 @@
+# Backend-specific .gitignore for NexHire
+
+# Visual Studio / Rider
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+*.iml
+
+# Build outputs
+bin/
+obj/
+publish/
+artifacts/
+
+# EF and tools
+*.db
+*.sqlite
+
+# Logs, test results
+*.log
+TestResults/
+coverage/
+
+# NuGet
+*.nupkg
+packages/
+
+# Secrets / local settings
+appsettings.*.Local
+appsettings.*.Development.json
+local.settings.json
+secrets.json
