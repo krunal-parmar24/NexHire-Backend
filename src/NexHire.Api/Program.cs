@@ -5,6 +5,7 @@ using System.Text;
 using Npgsql;
 using NexHire.Infrastructure.Persistence;
 using NexHire.Infrastructure.Services;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,11 +67,49 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "NexHire API", Version = "v1" });
+
+    // Add JWT Bearer Authorization to Swagger
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\nExample: 'Bearer eyJhbGci...'",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+
+    c.AddSecurityDefinition("Bearer", securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { securityScheme, new string[] { } }
+    });
+});
+
 var app = builder.Build();
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "NexHire API V1");
+        c.RoutePrefix = "swagger";
+    });
+}
 
 app.MapControllers();
 
@@ -80,10 +119,13 @@ using (var scope = app.Services.CreateScope())
     var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
     if (env.IsDevelopment())
     {
-        var db = scope.ServiceProvider.GetRequiredService<NexHireDbContext>();
-        var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-        // Run seeder synchronously and surface original exceptions (avoid AggregateException)
-        await NexHire.Infrastructure.Persistence.Seed.DevSeeder.SeedAsync(db, hasher);
+        var db = scope.ServiceProvider.GetService<NexHireDbContext>();
+        if (db != null)
+        {
+            var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            // Run seeder synchronously and surface original exceptions (avoid AggregateException)
+            await NexHire.Infrastructure.Persistence.Seed.DevSeeder.SeedAsync(db, hasher);
+        }
     }
 }
 
