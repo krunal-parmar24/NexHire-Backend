@@ -23,6 +23,11 @@ namespace NexHire.Infrastructure.Persistence
                 b.HasIndex(u => u.Email).IsUnique();
                 b.Property(u => u.Email).IsRequired();
                 b.Property(u => u.PasswordHash).IsRequired();
+                
+                b.OwnsOne(u => u.Profile, p =>
+                {
+                    p.ToJson("profile");
+                });
             });
 
             modelBuilder.Entity<Company>(b =>

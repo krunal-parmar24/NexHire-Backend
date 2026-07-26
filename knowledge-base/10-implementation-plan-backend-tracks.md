@@ -15,11 +15,11 @@
 - **DoD:** user can register (role-permanent), log in, refresh token.
 
 ## Day 2 — Onboarding Hard-Wall & Resume Parsing
-- Onboarding service; PdfPig/OpenXml text extraction (cap 12k chars); GitHub Models call to parse resume into profile fields; enforce "no platform access until complete" via middleware/route guard.
-- DB changes: extend Users with `profile` jsonb, `onboarding_completed` flag; add `credit_balance`, `credit_reset_date`.
-- API endpoints: `POST /api/onboarding/jobseeker`, `POST /api/onboarding/recruiter`, `POST /api/onboarding/parse-resume`.
-- AI/Agent: resume parse via GPT-4.1-mini (0-credit).
-- Testing: manual test with sample PDF/DOCX resumes; validate 1MB/12k-char caps.
+- [x] Onboarding service; PdfPig/OpenXml text extraction (cap 12k chars); GitHub Models call to parse resume into profile fields; enforce "no platform access until complete" via middleware/route guard.
+- [x] DB changes: extend Users with `profile` jsonb, `onboarding_completed` flag; add `credit_balance`, `credit_reset_date`.
+- [x] API endpoints: `POST /api/onboarding/jobseeker`, `POST /api/onboarding/recruiter`, `POST /api/onboarding/parse-resume`.
+- [x] AI/Agent: resume parse via GPT-4.1-mini (0-credit).
+- [x] Testing: manual test with sample PDF/DOCX resumes; validate 1MB/12k-char caps.
 - **Dependencies:** Day 1 auth.
 - **DoD:** onboarding blocks all navigation until submitted; resume parse populates ≥5 fields correctly on sample resume.
 

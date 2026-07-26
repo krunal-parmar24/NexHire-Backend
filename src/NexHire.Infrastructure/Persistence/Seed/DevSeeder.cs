@@ -34,6 +34,21 @@ namespace NexHire.Infrastructure.Persistence.Seed
                     OnboardingCompleted = false
                 };
                 db.Users.Add(recruiter);
+                await db.SaveChangesAsync(); // Save user to generate Id
+
+                // Seed demo company
+                if (!await db.Companies.AnyAsync())
+                {
+                    var company = new Company
+                    {
+                        Name = "Acme Corp",
+                        Industry = "Technology",
+                        Size = "100-500",
+                        RecruiterId = recruiter.Id,
+                        VerificationStatus = VerificationStatus.Verified
+                    };
+                    db.Companies.Add(company);
+                }
             }
 
             await db.SaveChangesAsync();
