@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexHire.Infrastructure.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NexHire.Infrastructure.Migrations
 {
     [DbContext(typeof(NexHireDbContext))]
-    partial class NexHireDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260726055348_Day2_Onboarding_Schema")]
+    partial class Day2_Onboarding_Schema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,14 +42,8 @@ namespace NexHire.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("RecruiterId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Size")
                         .HasColumnType("text");
-
-                    b.Property<int>("VerificationStatus")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

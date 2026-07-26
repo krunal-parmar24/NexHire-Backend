@@ -6,6 +6,12 @@ using Npgsql;
 using NexHire.Infrastructure.Persistence;
 using NexHire.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
+using NexHire.Application.Interfaces;
+using NexHire.Application.Services;
+using NexHire.Infrastructure.Persistence.Repositories;
+using NexHire.Infrastructure.DocumentExtraction;
+using NexHire.Infrastructure.Llm;
+using NexHire.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +52,12 @@ else
 // Services
 builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IOnboardingService, OnboardingService>();
+builder.Services.AddScoped<IResumeParsingService, ResumeParsingService>();
+builder.Services.AddScoped<ITextExtractor, TextExtractor>();
+builder.Services.AddHttpClient<ILlmClient, GitHubModelsClient>();
 
 // Auth
 builder.Services.AddAuthentication(options =>
@@ -109,6 +121,8 @@ app.UseRouting();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<OnboardingGuardMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
