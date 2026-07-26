@@ -129,6 +129,19 @@ Query: ?keyword=&location=&jobType=&remoteType=&page=1&pageSize=20
 }
 ```
 
+### `GET /api/jobs/saved`
+```json
+// 200 Response — returns list of job IDs the authenticated user has saved
+[ "j1...", "j2..." ]
+```
+
+### `POST /api/jobs/{id}/save`
+```json
+// Request: {}
+// 200 Response — toggles the saved state
+{ "isSaved": true }
+```
+
 ### `POST /api/jobs` (Recruiter)
 ```json
 // Request — fields per SRS §7.1

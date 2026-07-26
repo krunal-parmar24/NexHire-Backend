@@ -12,6 +12,7 @@ The following is a conceptual list to guide EF Core model/schema design, not a f
 | Companies | id, recruiter_id, name, verification_status, details |
 | Jobs | id, company_id, title, description, screening_questions[], status, created_at |
 | Applications | id, job_id, user_id, answers[], status, submitted_at |
+| SavedJobs | user_id, job_id, saved_at |
 | CreditLedger | id, user_id, action_type, credits_deducted, timestamp — supports the credit meter and enables debugging/refunds |
 | ChatConversations | id, user_id, messages[], created_at — supports chatbot context |
 | PlatformAIUsage | date, request_count (in **Redis**, not PostgreSQL) — tracks the daily platform-wide GitHub Models cap, distinct from CreditLedger |

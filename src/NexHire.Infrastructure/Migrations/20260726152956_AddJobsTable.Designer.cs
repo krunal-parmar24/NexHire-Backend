@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexHire.Infrastructure.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NexHire.Infrastructure.Migrations
 {
     [DbContext(typeof(NexHireDbContext))]
-    partial class NexHireDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260726152956_AddJobsTable")]
+    partial class AddJobsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,24 +105,6 @@ namespace NexHire.Infrastructure.Migrations
                     b.ToTable("Jobs");
                 });
 
-            modelBuilder.Entity("NexHire.Domain.Entities.SavedJob", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("JobId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("SavedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("UserId", "JobId");
-
-                    b.HasIndex("JobId");
-
-                    b.ToTable("SavedJobs");
-                });
-
             modelBuilder.Entity("NexHire.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -203,25 +188,6 @@ namespace NexHire.Infrastructure.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("ScreeningQuestions");
-                });
-
-            modelBuilder.Entity("NexHire.Domain.Entities.SavedJob", b =>
-                {
-                    b.HasOne("NexHire.Domain.Entities.Job", "Job")
-                        .WithMany()
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NexHire.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Job");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NexHire.Domain.Entities.User", b =>

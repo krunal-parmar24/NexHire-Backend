@@ -5,12 +5,12 @@
 > Day numbering is identical to the Frontend track (see Frontend KB's `09-implementation-plan-frontend-tracks.md`) for cross-team traceability. Each day lists only the Backend-owned work; Frontend tasks for the same day live in the Frontend knowledge base.
 
 ## Day 1 — Project Scaffolding & Auth Foundations
-- Init ASP.NET Core 9 solution (API/Application/Domain/Infrastructure).
-- Configure EF Core + Supabase Postgres connection.
-- Create Users, Companies tables/migrations.
-- Implement JWT access+refresh issuance; password hashing (BCrypt).
-- API endpoints: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`.
-- Testing: manual Postman collection for auth endpoints.
+- [x] Init ASP.NET Core 9 solution (API/Application/Domain/Infrastructure).
+- [x] Configure EF Core + Supabase Postgres connection.
+- [x] Create Users, Companies tables/migrations.
+- [x] Implement JWT access+refresh issuance; password hashing (BCrypt).
+- [x] API endpoints: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`.
+- [x] Testing: manual Postman collection for auth endpoints.
 - **Dependencies:** Supabase project provisioned first.
 - **DoD:** user can register (role-permanent), log in, refresh token.
 
@@ -24,10 +24,10 @@
 - **DoD:** onboarding blocks all navigation until submitted; resume parse populates ≥5 fields correctly on sample resume.
 
 ## Day 3 — Guest Browsing, Search & Job Listings
-- Jobs read endpoints with filter/pagination (keyword, location, type, remote/hybrid/onsite); seed sample jobs.
-- DB changes: create Jobs table (status enum: Draft/Active/Closed/Expired).
-- API endpoints: `GET /api/jobs`, `GET /api/jobs/{id}`.
-- Testing: verify guest can browse without auth.
+- [x] Jobs read endpoints with filter/pagination (keyword, location, type, remote/hybrid/onsite); seed sample jobs.
+- [x] DB changes: create Jobs table (status enum: Draft/Active/Closed/Expired).
+- [x] API endpoints: `GET /api/jobs`, `GET /api/jobs/{id}`.
+- [x] Testing: verify guest can browse without auth.
 - **Dependencies:** Day 1 auth (for gating), Jobs table.
 - **DoD:** guest sees jobs, filters work.
 
