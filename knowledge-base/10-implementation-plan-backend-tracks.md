@@ -32,10 +32,10 @@
 - **DoD:** guest sees jobs, filters work.
 
 ## Day 4 — Recruiter Job Posting & Screening Question Builder
-- Jobs CRUD (Draft/Active/Closed/Expired transitions); `screening_questions` jsonb persistence; ownership checks (recruiter_id scoping).
-- DB changes: add `screening_questions` jsonb column to Jobs.
-- API endpoints: `POST /api/jobs`, `PUT /api/jobs/{id}`, `PATCH /api/jobs/{id}/status`, `GET /api/jobs/mine`.
-- Testing: create job with mixed question types; verify state transitions.
+- [x] Jobs CRUD (Draft/Active/Closed/Expired transitions); `screening_questions` jsonb persistence; ownership checks (recruiter_id scoping).
+- [x] DB changes: add `screening_questions` jsonb column to Jobs.
+- [x] API endpoints: `POST /api/jobs`, `PUT /api/jobs/{id}`, `PATCH /api/jobs/{id}/status`, `GET /api/jobs/mine`.
+- [x] Testing: create job with mixed question types; verify state transitions.
 - **Dependencies:** Day 1 onboarding (recruiter fields), Day 3 Jobs table.
 - **DoD:** job persists with jsonb schema.
 
