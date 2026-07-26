@@ -1,21 +1,31 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace NexHire.Application.DTOs.Jobs
 {
-    public class JobDetailResponse
+    public class CreateJobRequest
     {
-        public Guid Id { get; set; }
+        [Required]
         public string Title { get; set; } = null!;
-        public string CompanyName { get; set; } = null!;
-        public Guid RecruiterId { get; set; }
+
+        [Required]
         public string Description { get; set; } = null!;
+
+        [Required]
         public string Requirements { get; set; } = null!;
+
+        [Required]
         public string Location { get; set; } = null!;
+
+        [Required]
         public string JobType { get; set; } = null!;
+
         public string? SalaryRange { get; set; }
+
+        [Required]
         public string RemoteType { get; set; } = null!;
-        public string Status { get; set; } = null!;
+
         public List<ScreeningQuestionDto> ScreeningQuestions { get; set; } = new();
     }
 }

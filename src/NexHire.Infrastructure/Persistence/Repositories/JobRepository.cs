@@ -105,5 +105,41 @@ namespace NexHire.Infrastructure.Persistence.Repositories
                 return true; // Saved
             }
         }
+
+        public async Task<Company?> GetCompanyByRecruiterIdAsync(Guid recruiterId)
+        {
+            return await _db.Companies.FirstOrDefaultAsync(c => c.RecruiterId == recruiterId);
+        }
+
+        public async Task<Job> CreateAsync(Job job)
+        {
+            _db.Jobs.Add(job);
+            await _db.SaveChangesAsync();
+            return job;
+        }
+
+        public async Task UpdateAsync(Job job)
+        {
+            _db.Jobs.Update(job);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<(List<Job> Items, int TotalCount)> GetJobsByRecruiterAsync(Guid recruiterId, int page, int pageSize)
+        {
+            var query = _db.Jobs
+                .Include(j => j.Company)
+                .Where(j => j.Company.RecruiterId == recruiterId)
+                .AsQueryable();
+
+            var totalCount = await query.CountAsync();
+            
+            var items = await query
+                .OrderByDescending(j => j.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }
