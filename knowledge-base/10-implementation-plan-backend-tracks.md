@@ -41,7 +41,7 @@
 
 ## Day 5 — Dynamic Application Form & Submission Rules
 - Applications CRUD; duplicate-application prevention; withdraw logic (status=Withdrawn, visible to recruiter); `answers` jsonb persistence.
-- DB changes: create Applications table (job_id, user_id, answers jsonb, status, submitted_at); unique constraint (job_id, user_id).
+- [x] DB changes: create Applications table (job_id, user_id, answers jsonb, status, submitted_at); unique constraint (job_id, user_id).
 - API endpoints: `POST /api/applications`, `GET /api/applications/mine`, `PATCH /api/applications/{id}/withdraw`.
 - Testing: duplicate apply blocked; withdraw before Hired/Rejected works, blocked after.
 - **Dependencies:** Day 4 dynamic schema, Day 2 profile data.

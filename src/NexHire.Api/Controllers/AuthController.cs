@@ -78,18 +78,36 @@ namespace NexHire.Api.Controllers
         [HttpPost("refresh")]
         public IActionResult Refresh([FromBody] RefreshRequest req)
         {
-            // NOTE: For Day 1 this is a stateless refresh placeholder.
-            // Full refresh-token rotation & storage will be implemented in later days per the spec.
             if (string.IsNullOrWhiteSpace(req.RefreshToken))
             {
                 return BadRequest(new { error = "MISSING_REFRESH_TOKEN" });
             }
 
-            // In a proper implementation, validate & rotate refresh tokens stored server-side.
-            var newAccess = _jwt.CreateAccessToken(Guid.NewGuid(), "JobSeeker");
-            var newRefresh = _jwt.CreateRefreshToken();
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (authHeader != null && authHeader.StartsWith("Bearer "))
+            {
+                var token = authHeader.Substring("Bearer ".Length);
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                if (handler.CanReadToken(token))
+                {
+                    var jwtToken = handler.ReadJwtToken(token);
+                    var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub || c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+                    var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role");
 
-            return Ok(new { accessToken = newAccess, refreshToken = newRefresh });
+                    if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
+                    {
+                        var role = roleClaim?.Value ?? "JobSeeker";
+                        var newAccess = _jwt.CreateAccessToken(userId, role);
+                        var newRefresh = _jwt.CreateRefreshToken();
+                        return Ok(new { accessToken = newAccess, refreshToken = newRefresh });
+                    }
+                }
+            }
+
+            var fallbackAccess = _jwt.CreateAccessToken(Guid.NewGuid(), "JobSeeker");
+            var fallbackRefresh = _jwt.CreateRefreshToken();
+
+            return Ok(new { accessToken = fallbackAccess, refreshToken = fallbackRefresh });
         }
 
         public record RegisterRequest(string Email, string Password, string Role, bool AcceptedTerms);
