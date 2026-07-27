@@ -14,6 +14,7 @@ namespace NexHire.Infrastructure.Persistence
         public DbSet<Company> Companies { get; set; } = null!;
         public DbSet<Job> Jobs { get; set; } = null!;
         public DbSet<SavedJob> SavedJobs { get; set; } = null!;
+        public DbSet<NexHire.Domain.Entities.Application> Applications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +73,28 @@ namespace NexHire.Infrastructure.Persistence
                 b.HasOne(sj => sj.Job)
                     .WithMany()
                     .HasForeignKey(sj => sj.JobId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<NexHire.Domain.Entities.Application>(b =>
+            {
+                b.HasKey(a => a.Id);
+                
+                b.HasIndex(a => new { a.JobId, a.UserId }).IsUnique();
+
+                b.OwnsMany(a => a.Answers, ans =>
+                {
+                    ans.ToJson("answers");
+                });
+
+                b.HasOne(a => a.Job)
+                    .WithMany()
+                    .HasForeignKey(a => a.JobId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasOne(a => a.User)
+                    .WithMany()
+                    .HasForeignKey(a => a.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

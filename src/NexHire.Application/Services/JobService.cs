@@ -39,7 +39,8 @@ namespace NexHire.Application.Services
                     Id = sq.QuestionId,
                     Label = sq.Label,
                     Type = sq.Type,
-                    Required = sq.Required
+                    Required = sq.Required,
+                    Options = sq.Options
                 }).ToList()
             };
         }
@@ -110,7 +111,8 @@ namespace NexHire.Application.Services
                     QuestionId = sq.Id,
                     Label = sq.Label,
                     Type = sq.Type,
-                    Required = sq.Required
+                    Required = sq.Required,
+                    Options = sq.Options
                 }).ToList()
             };
 
@@ -145,7 +147,8 @@ namespace NexHire.Application.Services
                 QuestionId = sq.Id,
                 Label = sq.Label,
                 Type = sq.Type,
-                Required = sq.Required
+                Required = sq.Required,
+                Options = sq.Options
             }).ToList();
 
             await _jobRepository.UpdateAsync(job);
