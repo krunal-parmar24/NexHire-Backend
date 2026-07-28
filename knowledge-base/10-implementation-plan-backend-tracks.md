@@ -56,10 +56,10 @@
 - **DoD:** all pipeline states reachable; dashboard counts match DB truth; resume links are valid.
 
 ## Day 7 — ATS Match Scoring Engine
-- `AtsScoringService`: Skills Coverage, Experience Fit, Certification Match, Domain/Title Match with dynamic re-weighting; semantic title match via lightweight LLM call or embedding similarity.
-- DB changes: none (computed on-demand; optionally cache score on Applications).
-- API endpoints: `GET /api/jobs/{id}/match-score`, internal service reused by Job Search & Match tool.
-- Testing: unit tests for weight redistribution logic (cert vs. no-cert JD scenarios).
+- [x] `AtsScoringService`: Skills Coverage, Experience Fit, Certification Match, Domain/Title Match with dynamic re-weighting; semantic title match via lightweight LLM call or embedding similarity.
+- [x] DB changes: none (computed on-demand; optionally cache score on Applications).
+- [x] API endpoints: `GET /api/jobs/{id}/match-score`, internal service reused by Job Search & Match tool.
+- [x] Testing: unit tests for weight redistribution logic (cert vs. no-cert JD scenarios).
 - **Dependencies:** Day 2 profile, Day 4 job requirements.
 - **DoD:** score matches SRS weight table on 3+ manual test cases including no-cert redistribution.
 

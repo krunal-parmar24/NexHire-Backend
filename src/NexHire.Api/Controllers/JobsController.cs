@@ -15,11 +15,13 @@ namespace NexHire.Api.Controllers
     {
         private readonly IJobService _jobService;
         private readonly IApplicationService _applicationService;
+        private readonly IAtsScoringService _atsScoringService;
 
-        public JobsController(IJobService jobService, IApplicationService applicationService)
+        public JobsController(IJobService jobService, IApplicationService applicationService, IAtsScoringService atsScoringService)
         {
             _jobService = jobService;
             _applicationService = applicationService;
+            _atsScoringService = atsScoringService;
         }
 
         [HttpGet]
@@ -173,6 +175,25 @@ namespace NexHire.Api.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Forbid();
+            }
+        }
+
+        [HttpGet("{id}/match-score")]
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> GetJobMatchScore(Guid id, CancellationToken ct)
+        {
+            try
+            {
+                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+                    return Unauthorized();
+
+                var scoreResponse = await _atsScoringService.GetMatchScoreAsync(id, userId, ct);
+                return Ok(scoreResponse);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { error = new { code = "JOB_NOT_FOUND", message = ex.Message } });
             }
         }
     }

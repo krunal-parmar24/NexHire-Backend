@@ -62,6 +62,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IResumeParsingService, ResumeParsingService>();
 builder.Services.AddScoped<ITextExtractor, TextExtractor>();
+builder.Services.AddScoped<IAtsScoringService, AtsScoringService>();
 
 builder.Services.AddHttpClient<ILlmClient, GitHubModelsClient>();
 
