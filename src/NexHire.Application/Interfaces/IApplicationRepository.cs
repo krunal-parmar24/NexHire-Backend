@@ -13,5 +13,6 @@ namespace NexHire.Application.Interfaces
         Task<List<NexHire.Domain.Entities.Application>> GetByJobIdAsync(Guid jobId, CancellationToken cancellationToken = default);
         Task AddAsync(NexHire.Domain.Entities.Application application, CancellationToken cancellationToken = default);
         Task UpdateAsync(NexHire.Domain.Entities.Application application, CancellationToken cancellationToken = default);
+        Task<(int TotalApplicants, int PendingReview)> GetApplicantCountsForRecruiterAsync(Guid recruiterId, CancellationToken cancellationToken = default);
     }
 }

@@ -2,9 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
 using NexHire.Application.DTOs.Jobs;
 using NexHire.Application.Interfaces;
+using NexHire.Application.Exceptions;
+using System.Security.Claims;
 
 namespace NexHire.Api.Controllers
 {
@@ -13,10 +14,12 @@ namespace NexHire.Api.Controllers
     public class JobsController : ControllerBase
     {
         private readonly IJobService _jobService;
+        private readonly IApplicationService _applicationService;
 
-        public JobsController(IJobService jobService)
+        public JobsController(IJobService jobService, IApplicationService applicationService)
         {
             _jobService = jobService;
+            _applicationService = applicationService;
         }
 
         [HttpGet]
@@ -142,12 +145,35 @@ namespace NexHire.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized();
 
             var result = await _jobService.GetJobsByRecruiterAsync(userId, page, pageSize);
             return Ok(result);
+        }
+
+        [HttpGet("{id}/applicants")]
+        [Authorize(Roles = "Recruiter")]
+        public async Task<IActionResult> GetJobApplicants(Guid id)
+        {
+            try
+            {
+                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var recruiterId))
+                    return Unauthorized();
+
+                var applicants = await _applicationService.GetJobApplicantsAsync(recruiterId, id);
+                return Ok(new { items = applicants });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { error = new { code = "JOB_NOT_FOUND", message = ex.Message } });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
         }
     }
 }

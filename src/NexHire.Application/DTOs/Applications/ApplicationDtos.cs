@@ -12,7 +12,8 @@ namespace NexHire.Application.DTOs.Applications
 
     public sealed record SubmitApplicationRequest(
         [Required] Guid JobId,
-        [Required] List<AnswerDto> Answers
+        [Required] List<AnswerDto> Answers,
+        [Required] string ResumeUrl
     );
 
     public sealed record SubmitApplicationResponse(

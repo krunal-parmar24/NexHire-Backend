@@ -14,5 +14,6 @@ namespace NexHire.Domain.Entities
         public List<Answer> Answers { get; set; } = new();
         public ApplicationStatus Status { get; set; } = ApplicationStatus.Applied;
         public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
+        public string? ResumeUrl { get; set; }
     }
 }

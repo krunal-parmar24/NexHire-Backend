@@ -5,13 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using NexHire.Application.DTOs.Applications;
 using NexHire.Application.Exceptions;
 using NexHire.Application.Interfaces;
+using NexHire.Domain.Entities;
 using System.Security.Claims;
 
 namespace NexHire.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "JobSeeker")]
     public class ApplicationsController : ControllerBase
     {
         private readonly IApplicationService _applicationService;
@@ -22,6 +22,7 @@ namespace NexHire.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "JobSeeker")]
         public async Task<IActionResult> SubmitApplication([FromBody] SubmitApplicationRequest request)
         {
             try
@@ -45,6 +46,7 @@ namespace NexHire.Api.Controllers
         }
 
         [HttpGet("mine")]
+        [Authorize(Roles = "JobSeeker")]
         public async Task<IActionResult> GetMyApplications()
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -53,6 +55,7 @@ namespace NexHire.Api.Controllers
         }
 
         [HttpPatch("{id:guid}/withdraw")]
+        [Authorize(Roles = "JobSeeker")]
         public async Task<IActionResult> WithdrawApplication(Guid id)
         {
             try
@@ -68,6 +71,30 @@ namespace NexHire.Api.Controllers
             catch (ConflictException ex)
             {
                 return Conflict(new { error = new { code = ex.Code, message = ex.Message } });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+        [HttpPatch("{id:guid}/status")]
+        [Authorize(Roles = "Recruiter")]
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateApplicationStatusRequest request)
+        {
+            try
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                await _applicationService.UpdateApplicationStatusAsync(userId, id, request.Status);
+                return Ok(new { status = request.Status });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { error = new { code = "NOT_FOUND", message = ex.Message } });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = ex.Message } });
             }
             catch (UnauthorizedAccessException)
             {

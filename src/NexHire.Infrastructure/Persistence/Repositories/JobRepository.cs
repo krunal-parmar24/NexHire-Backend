@@ -141,5 +141,12 @@ namespace NexHire.Infrastructure.Persistence.Repositories
 
             return (items, totalCount);
         }
+
+        public async Task<int> GetActiveJobsCountForRecruiterAsync(Guid recruiterId, CancellationToken cancellationToken = default)
+        {
+            return await _db.Jobs
+                .Where(j => j.Company != null && j.Company.RecruiterId == recruiterId && j.Status == JobStatus.Active)
+                .CountAsync(cancellationToken);
+        }
     }
 }

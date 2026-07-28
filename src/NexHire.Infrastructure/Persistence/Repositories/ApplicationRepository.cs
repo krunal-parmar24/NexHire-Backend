@@ -21,6 +21,7 @@ namespace NexHire.Infrastructure.Persistence.Repositories
         {
             return await _dbContext.Applications
                 .Include(a => a.Job)
+                .ThenInclude(j => j.Company)
                 .Include(a => a.User)
                 .ThenInclude(u => u.Profile)
                 .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
@@ -62,6 +63,17 @@ namespace NexHire.Infrastructure.Persistence.Repositories
         {
             _dbContext.Applications.Update(application);
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<(int TotalApplicants, int PendingReview)> GetApplicantCountsForRecruiterAsync(Guid recruiterId, CancellationToken cancellationToken = default)
+        {
+            var query = _dbContext.Applications
+                .Where(a => a.Job != null && a.Job.Company != null && a.Job.Company.RecruiterId == recruiterId);
+
+            var totalApplicants = await query.CountAsync(cancellationToken);
+            var pendingReview = await query.CountAsync(a => a.Status == NexHire.Domain.Enums.ApplicationStatus.Applied, cancellationToken);
+
+            return (totalApplicants, pendingReview);
         }
     }
 }
