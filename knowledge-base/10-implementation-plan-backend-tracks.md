@@ -48,12 +48,12 @@
 - **DoD:** seeker can apply, view status, withdraw; recruiter sees Withdrawn in pipeline.
 
 ## Day 6 — Applicant Management & Recruiter Dashboard
-- [x] Applicant list per job (answers, resume, profile summary); status transition endpoint (Applied→Shortlisted→Interview→Rejected/Hired); dashboard aggregate query.
+- [x] Applicant list per job (answers, resume public URL from Supabase, profile summary); status transition endpoint (Applied→Shortlisted→Interview→Rejected/Hired); dashboard aggregate query.
 - [x] DB changes: none (reuse Applications/Jobs); add indices on job_id/status.
 - [x] API endpoints: `GET /api/jobs/{id}/applicants`, `PATCH /api/applications/{id}/status`, `GET /api/dashboard/recruiter`.
-- [x] Testing: status transitions reflected instantly; scoping verified (recruiter sees only own jobs).
+- [x] Testing: status transitions reflected instantly; scoping verified (recruiter sees only own jobs); verify resume URLs are correctly returned.
 - **Dependencies:** Day 5 Applications table.
-- **DoD:** all pipeline states reachable; dashboard counts match DB truth.
+- **DoD:** all pipeline states reachable; dashboard counts match DB truth; resume links are valid.
 
 ## Day 7 — ATS Match Scoring Engine
 - `AtsScoringService`: Skills Coverage, Experience Fit, Certification Match, Domain/Title Match with dynamic re-weighting; semantic title match via lightweight LLM call or embedding similarity.
