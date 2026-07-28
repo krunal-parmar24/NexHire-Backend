@@ -82,5 +82,66 @@ namespace NexHire.Infrastructure.Llm
 
             return new ParsedFieldsDto();
         }
+
+        public async Task<int> GetSemanticTitleMatchAsync(string candidateTitle, string jobTitle)
+        {
+            if (string.IsNullOrWhiteSpace(_githubToken) || string.IsNullOrWhiteSpace(candidateTitle) || string.IsNullOrWhiteSpace(jobTitle))
+            {
+                return 0; // Default or fallback
+            }
+
+            var requestBody = new
+            {
+                model = "gpt-4o-mini",
+                messages = new[]
+                {
+                    new
+                    {
+                        role = "system",
+                        content = "You are an ATS semantic matching engine. Compare the candidate's job title with the target job title. Return ONLY a single integer from 0 to 100 representing their semantic alignment and similarity, where 100 is an exact match and 0 is completely unrelated. Do not return any other text."
+                    },
+                    new
+                    {
+                        role = "user",
+                        content = $"Candidate Title: {candidateTitle}\nTarget Job Title: {jobTitle}"
+                    }
+                }
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://models.inference.ai.azure.com/chat/completions")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _githubToken);
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                return 0;
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var document = JsonDocument.Parse(responseJson);
+
+            try
+            {
+                var contentString = document.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString();
+
+                if (!string.IsNullOrEmpty(contentString) && int.TryParse(contentString.Trim(), out int score))
+                {
+                    return Math.Clamp(score, 0, 100);
+                }
+            }
+            catch
+            {
+                // Ignore errors and fallback to 0
+            }
+
+            return 0;
+        }
     }
 }
