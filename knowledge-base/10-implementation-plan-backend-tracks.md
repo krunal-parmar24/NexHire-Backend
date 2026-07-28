@@ -48,10 +48,10 @@
 - **DoD:** seeker can apply, view status, withdraw; recruiter sees Withdrawn in pipeline.
 
 ## Day 6 — Applicant Management & Recruiter Dashboard
-- Applicant list per job (answers, resume, profile summary); status transition endpoint (Applied→Shortlisted→Interview→Rejected/Hired); dashboard aggregate query.
-- DB changes: none (reuse Applications/Jobs); add indices on job_id/status.
-- API endpoints: `GET /api/jobs/{id}/applicants`, `PATCH /api/applications/{id}/status`, `GET /api/dashboard/recruiter`.
-- Testing: status transitions reflected instantly; scoping verified (recruiter sees only own jobs).
+- [x] Applicant list per job (answers, resume, profile summary); status transition endpoint (Applied→Shortlisted→Interview→Rejected/Hired); dashboard aggregate query.
+- [x] DB changes: none (reuse Applications/Jobs); add indices on job_id/status.
+- [x] API endpoints: `GET /api/jobs/{id}/applicants`, `PATCH /api/applications/{id}/status`, `GET /api/dashboard/recruiter`.
+- [x] Testing: status transitions reflected instantly; scoping verified (recruiter sees only own jobs).
 - **Dependencies:** Day 5 Applications table.
 - **DoD:** all pipeline states reachable; dashboard counts match DB truth.
 

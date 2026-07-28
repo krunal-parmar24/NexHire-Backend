@@ -81,6 +81,7 @@ namespace NexHire.Infrastructure.Persistence
                 b.HasKey(a => a.Id);
                 
                 b.HasIndex(a => new { a.JobId, a.UserId }).IsUnique();
+                b.HasIndex(a => new { a.JobId, a.Status });
 
                 b.OwnsMany(a => a.Answers, ans =>
                 {

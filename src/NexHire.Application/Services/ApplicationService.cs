@@ -47,13 +47,19 @@ namespace NexHire.Application.Services
                 }
             }
 
+            if (string.IsNullOrWhiteSpace(request.ResumeUrl))
+            {
+                throw new ArgumentException("Resume is required.");
+            }
+
             var application = new NexHire.Domain.Entities.Application
             {
                 JobId = request.JobId,
                 UserId = userId,
                 Status = ApplicationStatus.Applied,
                 SubmittedAt = DateTime.UtcNow,
-                Answers = request.Answers.Select(a => new Answer { QuestionId = a.QuestionId, Value = a.Value }).ToList()
+                Answers = request.Answers.Select(a => new Answer { QuestionId = a.QuestionId, Value = a.Value }).ToList(),
+                ResumeUrl = request.ResumeUrl
             };
 
             await _applicationRepository.AddAsync(application, cancellationToken);
@@ -117,8 +123,8 @@ namespace NexHire.Application.Services
                 a.User?.Profile?.FullName ?? "Unknown",
                 a.Status.ToString(),
                 a.Answers.Select(ans => new AnswerDto(ans.QuestionId, ans.Value)).ToList(),
-                null,
-                null
+                a.ResumeUrl,
+                a.User?.Profile != null ? $"{a.User.Profile.TotalExperienceYears} yrs experience, {a.User.Profile.CurrentTitle}" : null
             )).ToList();
         }
 
@@ -138,6 +144,11 @@ namespace NexHire.Application.Services
             if (!Enum.TryParse<ApplicationStatus>(status, true, out var parsedStatus))
             {
                 throw new ArgumentException("Invalid application status.");
+            }
+
+            if (parsedStatus == ApplicationStatus.Withdrawn)
+            {
+                throw new ArgumentException("Cannot set status to Withdrawn.");
             }
 
             application.Status = parsedStatus;

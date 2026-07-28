@@ -15,5 +15,6 @@ namespace NexHire.Application.Interfaces
         Task<Job> CreateAsync(Job job);
         Task UpdateAsync(Job job);
         Task<(List<Job> Items, int TotalCount)> GetJobsByRecruiterAsync(Guid recruiterId, int page, int pageSize);
+        Task<int> GetActiveJobsCountForRecruiterAsync(Guid recruiterId, CancellationToken cancellationToken = default);
     }
 }
