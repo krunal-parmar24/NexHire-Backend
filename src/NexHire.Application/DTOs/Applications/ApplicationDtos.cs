@@ -6,8 +6,8 @@ using System.Text.Json.Serialization;
 namespace NexHire.Application.DTOs.Applications
 {
     public sealed record AnswerDto(
-        [Required] [property: JsonPropertyName("questionId")] string QuestionId,
-        [Required] [property: JsonPropertyName("value")] string Value
+        [Required][property: JsonPropertyName("questionId")] string QuestionId,
+        [Required][property: JsonPropertyName("value")] string Value
     );
 
     public sealed record SubmitApplicationRequest(
@@ -20,11 +20,11 @@ namespace NexHire.Application.DTOs.Applications
         Guid ApplicationId,
         string Status
     );
-    
+
     public sealed record WithdrawApplicationResponse(
         string Status
     );
-    
+
     public sealed record ApplicationDto(
         Guid Id,
         Guid JobId,

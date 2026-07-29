@@ -60,9 +60,10 @@
 
 ## 9. Error Handling & Logging
 
-- A single global exception middleware (`GlobalExceptionMiddleware`) catches unhandled exceptions and returns the consistent error envelope defined in [15-api-contracts-backend.md](15-api-contracts-backend.md).
+- A single global MVC exception filter (`NexHire.Api.Filters.ApiExceptionFilter`, registered via `options.Filters.Add<ApiExceptionFilter>()` in `Program.cs`) catches unhandled exceptions thrown from any controller action and maps them to the standard `{ error: { code, message } }` envelope — controllers must **not** contain per-action `try/catch` blocks for these known exception types.
+- Domain/application failures are represented by typed exceptions in `NexHire.Application.Exceptions`, each carrying its own machine-readable `Code`: `NotFoundException` (→ 404), `ConflictException` (→ 409), `AuthenticationException` (→ 401). Plain `ArgumentException` maps to 400 (`VALIDATION_ERROR`) and `UnauthorizedAccessException` maps to a 403 `ForbidResult` — both handled centrally by the same filter. Add new typed exceptions here (not raw BCL exceptions) when a new distinct error code is needed, and add the corresponding `case` to `ApiExceptionFilter`.
 - AI/agent failures follow the stated rule exactly: no credit deduction on failure, and the API returns a clear error code (`AI_GENERATION_FAILED`) rather than a silent failure.
-- Logging uses Serilog; log at `Information` for normal request flow, `Warning` for handled failures (rate limit hit, credit exhausted), `Error` for unhandled exceptions.
+- Logging uses the built-in `Microsoft.Extensions.Logging` (`ILogger<T>` injected via constructor) — every class that can silently swallow an exception (document/text extraction, external HTTP/LLM calls) must inject `ILogger<T>` and log a `Warning` with the exception before falling back to a default value. Log at `Information` for normal request flow, `Warning` for handled/expected failures (rate limit hit, credit exhausted, extraction/parse fallback), `Error` for unhandled exceptions.
 - Never log JWT tokens, LLM API keys, or full resume text content.
 
 ## 10. Git & Commit Conventions (Authoritative — Shared with Frontend)
@@ -75,6 +76,42 @@ This is the authoritative copy of the Git/commit convention; the Frontend knowle
 - Reference the Implementation Plan Day number in the PR description (e.g., "Implements Day 5 — Dynamic Application Form & Submission Rules").
 - Small, single-purpose commits/PRs preferred over large multi-feature commits, to keep traceability to individual Implementation Plan tasks intact.
 
+## 11. Refactor-Established Conventions (Authoritative)
+
+The following conventions were established during the July 2026 backend quality-audit refactor and **must be followed by default for all new backend code** in this project.
+
+### 11.1 Folder/Layer Structure
+
+- Controller → Service (interface, in `Application/Interfaces`) → Repository (interface, in `Application/Interfaces`) → `DbContext`. Controllers must never inject `DbContext` or a repository directly — always go through a Service interface.
+- All public service/repository **interfaces** live in `NexHire.Application/Interfaces/`, regardless of which layer implements them. Concrete implementations that require an Infrastructure-layer dependency (EF Core, JWT libraries, external HTTP clients) live in `NexHire.Infrastructure/Services|Persistence|Llm|DocumentExtraction/`; pure-application-logic implementations live in `NexHire.Application/Services/`.
+- Auth is a first-class vertical slice like Jobs/Applications/Onboarding: `IAuthService`/`AuthService` in Application, `AuthController` in Api depends only on `IAuthService` — never on `DbContext`, `IPasswordHasher`, or `IJwtTokenService` directly.
+
+### 11.2 Constants & Magic Values
+
+- Centralize magic strings/numbers into a `Common/Constants/` folder **scoped to the layer that owns the concern**:
+  - `NexHire.Application/Common/Constants/` — business-rule constants shared across layers (e.g., `FileUploadConstants.MaxResumeSizeBytes`).
+  - `NexHire.Api/Common/Constants/` — API-host concerns only (e.g., `CorsConstants`, `ApiRouteConstants`).
+  - Provider-specific literals (endpoint URLs, model names, prompts) live next to their client, e.g. `NexHire.Infrastructure/Llm/LlmConstants.cs`.
+- Never inline a repeated literal (URL, size limit, route prefix, policy name) directly in a controller/service/middleware body — add it to the appropriate constants class first.
+
+### 11.3 Shared Cross-Cutting Helpers
+
+- User-id extraction from `ClaimsPrincipal` must use `NexHire.Api.Extensions.ClaimsPrincipalExtensions`: `User.GetUserId()` (throws if missing/invalid — for actions where the `[Authorize]` attribute guarantees a valid claim) or `User.TryGetUserId(out var id)` (for actions that need to return `Unauthorized()` gracefully). Do not re-inline `Guid.Parse`/`Guid.TryParse` claim-extraction logic in a controller.
+- HTTP error responses for known exception types must **not** be hand-built in controllers — see §9 (`ApiExceptionFilter`).
+
+### 11.4 DI & Interface Pattern for New Services/Repositories
+
+1. Define the interface in `NexHire.Application/Interfaces/I<Name>.cs` with XML `<summary>` docs on every member.
+2. Implement it in the layer that owns the dependency (`Application/Services` for pure orchestration, `Infrastructure/*` for anything touching EF Core, HTTP, or a third-party SDK).
+3. Add class-level `/// <inheritdoc cref="I<Name>"/>` on the implementation.
+4. Register in `Program.cs` with the narrowest applicable lifetime (see §5).
+5. If the implementation needs a NuGet package not already referenced by that project, do not add it without explicit approval — prefer exposing a primitive-typed method on the interface (e.g., `bool TryReadAccessToken(string token, out Guid userId, out string role)`) so the dependent layer doesn't need the package.
+
+### 11.5 Exception Handling & Logging Pattern
+
+- See §9 for the authoritative `ApiExceptionFilter` + typed-exception pattern.
+- Any class that can encounter a recoverable failure (parsing, external API calls, file extraction) must inject `ILogger<T>` via constructor and log a `Warning` with the exception before returning a fallback value — never swallow silently with a bare `catch { }`.
+
 ## Implementation Checklist
 
 - [ ] Enable nullable reference types across all backend projects
@@ -83,5 +120,5 @@ This is the authoritative copy of the Git/commit convention; the Frontend knowle
 - [ ] Configure EF Core jsonb mapping for `screening_questions` and `answers`
 - [ ] Configure pgvector HNSW indexes on all 5 embedding tables
 - [ ] Implement credit-deduction interceptor as a single cross-cutting decorator
-- [ ] Configure Serilog log levels (Information/Warning/Error) per this document's guidance
+- [ ] Configure `ILogger<T>` log levels (Information/Warning/Error) per this document's guidance
 - [ ] Adopt Conventional Commits format for all commits/PRs

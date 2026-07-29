@@ -5,6 +5,7 @@ using NexHire.Application.Interfaces;
 
 namespace NexHire.Application.Services
 {
+    /// <inheritdoc cref="IResumeParsingService"/>
     public class ResumeParsingService : IResumeParsingService
     {
         private readonly ITextExtractor _textExtractor;
@@ -20,7 +21,7 @@ namespace NexHire.Application.Services
         {
             var text = _textExtractor.ExtractText(fileStream, fileName);
             var parsedFields = await _llmClient.ParseResumeTextAsync(text);
-            
+
             return new ParseResumeResponse
             {
                 ParsedFields = parsedFields,

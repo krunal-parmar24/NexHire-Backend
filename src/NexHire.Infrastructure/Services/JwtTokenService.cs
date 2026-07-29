@@ -5,15 +5,11 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
+using NexHire.Application.Interfaces;
 
 namespace NexHire.Infrastructure.Services
 {
-    public interface IJwtTokenService
-    {
-        string CreateAccessToken(Guid userId, string role);
-        string CreateRefreshToken();
-    }
-
+    /// <inheritdoc cref="IJwtTokenService"/>
     public class JwtTokenService : IJwtTokenService
     {
         private readonly string _signingKey;
@@ -47,6 +43,30 @@ namespace NexHire.Infrastructure.Services
         public string CreateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        }
+
+        public bool TryReadAccessToken(string token, out Guid userId, out string role)
+        {
+            userId = Guid.Empty;
+            role = string.Empty;
+
+            var handler = new JwtSecurityTokenHandler();
+            if (!handler.CanReadToken(token))
+            {
+                return false;
+            }
+
+            var jwtToken = handler.ReadJwtToken(token);
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub || c.Type == ClaimTypes.NameIdentifier);
+            var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role || c.Type == "role");
+
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out userId))
+            {
+                return false;
+            }
+
+            role = roleClaim?.Value ?? "JobSeeker";
+            return true;
         }
     }
 }

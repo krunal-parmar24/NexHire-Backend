@@ -1,14 +1,16 @@
 using System;
+using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NexHire.Api.Extensions;
 using NexHire.Application.DTOs.Jobs;
 using NexHire.Application.Interfaces;
-using NexHire.Application.Exceptions;
-using System.Security.Claims;
 
 namespace NexHire.Api.Controllers
 {
+    /// <summary>Job listing search, CRUD, saved-jobs, applicant listing, and ATS match-score endpoints.</summary>
     [ApiController]
     [Route("api/[controller]")]
     public class JobsController : ControllerBase
@@ -50,11 +52,9 @@ namespace NexHire.Api.Controllers
 
             // Guests/Seekers should only be able to view Active jobs
             // Recruiters can view their own jobs regardless of status
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-            var isOwner = !string.IsNullOrEmpty(userIdStr) && 
-                          Guid.TryParse(userIdStr, out var userId) && 
-                          role == "Recruiter" && 
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var isOwner = User.TryGetUserId(out var userId) &&
+                          role == "Recruiter" &&
                           job.RecruiterId == userId;
 
             if (job.Status != "Active" && !isOwner)
@@ -69,8 +69,7 @@ namespace NexHire.Api.Controllers
         [Authorize]
         public async Task<IActionResult> GetSavedJobs()
         {
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var savedJobIds = await _jobService.GetSavedJobIdsAsync(userId);
@@ -81,11 +80,10 @@ namespace NexHire.Api.Controllers
         [Authorize]
         public async Task<IActionResult> ToggleSavedJob(Guid id)
         {
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
-            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
             if (role == "Recruiter")
             {
                 return Forbid();
@@ -99,8 +97,7 @@ namespace NexHire.Api.Controllers
         [Authorize(Roles = "Recruiter")]
         public async Task<IActionResult> CreateJob([FromBody] CreateJobRequest request)
         {
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var result = await _jobService.CreateJobAsync(request, userId);
@@ -111,8 +108,7 @@ namespace NexHire.Api.Controllers
         [Authorize(Roles = "Recruiter")]
         public async Task<IActionResult> UpdateJob(Guid id, [FromBody] CreateJobRequest request)
         {
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var result = await _jobService.UpdateJobAsync(id, request, userId);
@@ -128,8 +124,7 @@ namespace NexHire.Api.Controllers
         [Authorize(Roles = "Recruiter")]
         public async Task<IActionResult> UpdateJobStatus(Guid id, [FromBody] UpdateJobStatusRequest request)
         {
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var result = await _jobService.UpdateJobStatusAsync(id, request.Status, userId);
@@ -147,8 +142,7 @@ namespace NexHire.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var result = await _jobService.GetJobsByRecruiterAsync(userId, page, pageSize);
@@ -159,42 +153,22 @@ namespace NexHire.Api.Controllers
         [Authorize(Roles = "Recruiter")]
         public async Task<IActionResult> GetJobApplicants(Guid id)
         {
-            try
-            {
-                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var recruiterId))
-                    return Unauthorized();
+            if (!User.TryGetUserId(out var recruiterId))
+                return Unauthorized();
 
-                var applicants = await _applicationService.GetJobApplicantsAsync(recruiterId, id);
-                return Ok(new { items = applicants });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { error = new { code = "JOB_NOT_FOUND", message = ex.Message } });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
+            var applicants = await _applicationService.GetJobApplicantsAsync(recruiterId, id);
+            return Ok(new { items = applicants });
         }
 
         [HttpGet("{id}/match-score")]
         [Authorize(Roles = "JobSeeker")]
         public async Task<IActionResult> GetJobMatchScore(Guid id, CancellationToken ct)
         {
-            try
-            {
-                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-                    return Unauthorized();
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
 
-                var scoreResponse = await _atsScoringService.GetMatchScoreAsync(id, userId, ct);
-                return Ok(scoreResponse);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { error = new { code = "JOB_NOT_FOUND", message = ex.Message } });
-            }
+            var scoreResponse = await _atsScoringService.GetMatchScoreAsync(id, userId, ct);
+            return Ok(scoreResponse);
         }
     }
 }

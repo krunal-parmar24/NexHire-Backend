@@ -1,7 +1,7 @@
 using NexHire.Infrastructure.Persistence;
 using NexHire.Domain.Entities;
 using NexHire.Domain.Enums;
-using NexHire.Infrastructure.Services;
+using NexHire.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

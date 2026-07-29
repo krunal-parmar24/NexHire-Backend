@@ -5,10 +5,15 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using NexHire.Api.Common.Constants;
 using NexHire.Infrastructure.Persistence;
 
 namespace NexHire.Api.Middleware
 {
+    /// <summary>
+    /// Blocks authenticated requests to any endpoint other than auth/onboarding routes
+    /// until the current user has completed role-specific onboarding.
+    /// </summary>
     public class OnboardingGuardMiddleware
     {
         private readonly RequestDelegate _next;
@@ -21,9 +26,9 @@ namespace NexHire.Api.Middleware
         public async Task InvokeAsync(HttpContext context, NexHireDbContext dbContext)
         {
             var path = context.Request.Path.Value?.ToLower() ?? "";
-            
+
             // Bypass auth routes and onboarding routes
-            if (path.StartsWith("/api/auth") || path.StartsWith("/api/onboarding"))
+            if (path.StartsWith(ApiRouteConstants.AuthRoutePrefix) || path.StartsWith(ApiRouteConstants.OnboardingRoutePrefix))
             {
                 await _next(context);
                 return;

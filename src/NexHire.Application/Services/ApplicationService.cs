@@ -11,6 +11,7 @@ using NexHire.Domain.Enums;
 
 namespace NexHire.Application.Services
 {
+    /// <inheritdoc cref="IApplicationService"/>
     public class ApplicationService : IApplicationService
     {
         private readonly IApplicationRepository _applicationRepository;
@@ -38,7 +39,7 @@ namespace NexHire.Application.Services
 
             var mandatoryQuestions = job.ScreeningQuestions.Where(q => q.Required).Select(q => q.QuestionId).ToList();
             var providedAnswers = request.Answers.Select(a => a.QuestionId).ToHashSet();
-            
+
             foreach (var mq in mandatoryQuestions)
             {
                 if (!providedAnswers.Contains(mq))
@@ -109,7 +110,7 @@ namespace NexHire.Application.Services
             var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
             {
-                throw new NotFoundException("Job not found.");
+                throw new NotFoundException("JOB_NOT_FOUND", "Job not found.");
             }
 
             if (job.Company?.RecruiterId != recruiterId)

@@ -26,7 +26,7 @@ namespace NexHire.Infrastructure.Persistence
                 b.HasIndex(u => u.Email).IsUnique();
                 b.Property(u => u.Email).IsRequired();
                 b.Property(u => u.PasswordHash).IsRequired();
-                
+
                 b.OwnsOne(u => u.Profile, p =>
                 {
                     p.ToJson("profile");
@@ -48,7 +48,7 @@ namespace NexHire.Infrastructure.Persistence
                 b.Property(j => j.Location).IsRequired();
                 b.Property(j => j.JobType).IsRequired();
                 b.Property(j => j.RemoteType).IsRequired();
-                
+
                 b.OwnsMany(j => j.ScreeningQuestions, sq =>
                 {
                     sq.ToJson("screening_questions");
@@ -79,7 +79,7 @@ namespace NexHire.Infrastructure.Persistence
             modelBuilder.Entity<NexHire.Domain.Entities.Application>(b =>
             {
                 b.HasKey(a => a.Id);
-                
+
                 b.HasIndex(a => new { a.JobId, a.UserId }).IsUnique();
                 b.HasIndex(a => new { a.JobId, a.Status });
 

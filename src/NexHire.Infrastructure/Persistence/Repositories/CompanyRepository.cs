@@ -4,6 +4,7 @@ using NexHire.Domain.Entities;
 
 namespace NexHire.Infrastructure.Persistence.Repositories
 {
+    /// <inheritdoc cref="ICompanyRepository"/>
     public class CompanyRepository : ICompanyRepository
     {
         private readonly NexHireDbContext _db;

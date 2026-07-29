@@ -6,6 +6,7 @@ using NexHire.Application.Interfaces;
 
 namespace NexHire.Application.Services
 {
+    /// <inheritdoc cref="IDashboardService"/>
     public class DashboardService : IDashboardService
     {
         private readonly IJobRepository _jobRepository;

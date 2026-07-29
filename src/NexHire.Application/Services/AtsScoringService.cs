@@ -10,6 +10,7 @@ using NexHire.Application.Interfaces;
 
 namespace NexHire.Application.Services
 {
+    /// <inheritdoc cref="IAtsScoringService"/>
     public class AtsScoringService : IAtsScoringService
     {
         // Certification keywords used ONLY to detect whether the JD mentions
@@ -70,11 +71,11 @@ namespace NexHire.Application.Services
         {
             var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
-                throw new NotFoundException($"Job {jobId} not found.");
+                throw new NotFoundException("JOB_NOT_FOUND", $"Job {jobId} not found.");
 
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
-                throw new NotFoundException($"User {userId} not found.");
+                throw new NotFoundException("JOB_NOT_FOUND", $"User {userId} not found.");
 
             var profile = user.Profile ?? new Domain.Entities.UserProfile();
 
