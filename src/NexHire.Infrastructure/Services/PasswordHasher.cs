@@ -1,13 +1,9 @@
 using BCrypt.Net;
+using NexHire.Application.Interfaces;
 
 namespace NexHire.Infrastructure.Services
 {
-    public interface IPasswordHasher
-    {
-        string Hash(string password);
-        bool Verify(string password, string hash);
-    }
-
+    /// <inheritdoc cref="IPasswordHasher"/>
     public class BcryptPasswordHasher : IPasswordHasher
     {
         public string Hash(string password)

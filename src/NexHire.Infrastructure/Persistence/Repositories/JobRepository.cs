@@ -9,6 +9,7 @@ using NexHire.Domain.Enums;
 
 namespace NexHire.Infrastructure.Persistence.Repositories
 {
+    /// <inheritdoc cref="IJobRepository"/>
     public class JobRepository : IJobRepository
     {
         private readonly NexHireDbContext _db;
@@ -63,7 +64,7 @@ namespace NexHire.Infrastructure.Persistence.Repositories
             }
 
             var totalCount = await query.CountAsync();
-            
+
             var items = await query
                 .OrderByDescending(j => j.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -132,7 +133,7 @@ namespace NexHire.Infrastructure.Persistence.Repositories
                 .AsQueryable();
 
             var totalCount = await query.CountAsync();
-            
+
             var items = await query
                 .OrderByDescending(j => j.CreatedAt)
                 .Skip((page - 1) * pageSize)

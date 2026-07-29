@@ -7,6 +7,7 @@ using NexHire.Domain.Enums;
 
 namespace NexHire.Application.Services
 {
+    /// <inheritdoc cref="IOnboardingService"/>
     public class OnboardingService : IOnboardingService
     {
         private readonly IUserRepository _userRepository;
@@ -55,9 +56,9 @@ namespace NexHire.Application.Services
                 RecruiterId = userId,
                 VerificationStatus = VerificationStatus.Unverified
             };
-            
+
             await _companyRepository.AddAsync(company);
-            
+
             user.OnboardingCompleted = true;
             await _userRepository.UpdateAsync(user);
             return true;

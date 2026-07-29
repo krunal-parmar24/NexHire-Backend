@@ -8,6 +8,7 @@ using NexHire.Application.Interfaces;
 
 namespace NexHire.Infrastructure.Persistence.Repositories
 {
+    /// <inheritdoc cref="IApplicationRepository"/>
     public class ApplicationRepository : IApplicationRepository
     {
         private readonly NexHireDbContext _dbContext;

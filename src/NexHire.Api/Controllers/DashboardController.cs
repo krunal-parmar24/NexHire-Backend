@@ -2,11 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NexHire.Api.Extensions;
 using NexHire.Application.Interfaces;
-using System.Security.Claims;
 
 namespace NexHire.Api.Controllers
 {
+    /// <summary>Recruiter-facing dashboard metrics endpoint.</summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = "Recruiter")]
@@ -22,8 +23,7 @@ namespace NexHire.Api.Controllers
         [HttpGet("recruiter")]
         public async Task<IActionResult> GetRecruiterDashboard()
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var recruiterId))
+            if (!User.TryGetUserId(out var recruiterId))
                 return Unauthorized();
 
             var result = await _dashboardService.GetRecruiterDashboardAsync(recruiterId);

@@ -7,6 +7,7 @@ using NexHire.Application.Interfaces;
 
 namespace NexHire.Application.Services
 {
+    /// <inheritdoc cref="IJobService"/>
     public class JobService : IJobService
     {
         private readonly IJobRepository _jobRepository;
@@ -117,7 +118,7 @@ namespace NexHire.Application.Services
             };
 
             var created = await _jobRepository.CreateAsync(job);
-            
+
             return new CreateJobResponse
             {
                 Id = created.Id,

@@ -12,6 +12,7 @@ using NexHire.Infrastructure.Persistence.Repositories;
 using NexHire.Infrastructure.DocumentExtraction;
 using NexHire.Infrastructure.Llm;
 using NexHire.Api.Middleware;
+using NexHire.Api.Common.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,7 @@ else
 builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
@@ -86,13 +88,16 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173")
+    options.AddPolicy(CorsConstants.AllowFrontendPolicy,
+        policy => policy.WithOrigins(CorsConstants.AllowedFrontendOrigins)
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<NexHire.Api.Filters.ApiExceptionFilter>();
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -125,7 +130,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 app.UseRouting();
-app.UseCors("AllowFrontend");
+app.UseCors(CorsConstants.AllowFrontendPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 

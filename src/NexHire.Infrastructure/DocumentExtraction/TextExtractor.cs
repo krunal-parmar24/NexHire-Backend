@@ -2,13 +2,22 @@ using System;
 using System.IO;
 using System.Text;
 using DocumentFormat.OpenXml.Packaging;
+using Microsoft.Extensions.Logging;
 using NexHire.Application.Interfaces;
 using UglyToad.PdfPig;
 
 namespace NexHire.Infrastructure.DocumentExtraction
 {
+    /// <inheritdoc cref="ITextExtractor"/>
     public class TextExtractor : ITextExtractor
     {
+        private readonly ILogger<TextExtractor> _logger;
+
+        public TextExtractor(ILogger<TextExtractor> logger)
+        {
+            _logger = logger;
+        }
+
         public string ExtractText(Stream fileStream, string fileName, int maxCharacters = 12000)
         {
             if (string.IsNullOrWhiteSpace(fileName)) return string.Empty;
@@ -27,9 +36,10 @@ namespace NexHire.Infrastructure.DocumentExtraction
                     text = ExtractFromDocx(fileStream);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Fallback or log error. For this implementation we return empty.
+                // Fallback: text extraction failures are non-fatal for the caller, so we log and return empty.
+                _logger.LogWarning(ex, "Failed to extract text from file {FileName}", fileName);
                 return string.Empty;
             }
 
@@ -55,7 +65,7 @@ namespace NexHire.Infrastructure.DocumentExtraction
         private string ExtractFromDocx(Stream stream)
         {
             using var wordDocument = WordprocessingDocument.Open(stream, false);
-            var body = wordDocument.MainDocumentPart?.Document.Body;
+            var body = wordDocument.MainDocumentPart?.Document?.Body;
             return body?.InnerText ?? string.Empty;
         }
     }
